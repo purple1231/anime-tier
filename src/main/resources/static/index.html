@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 애니메이션 검색기</title>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; padding: 40px; background-color: #f8f9fa; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { color: #333; text-align: center; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 30px; }
+        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+        button { padding: 12px 24px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        button:hover { background-color: #0056b3; }
+        #resultList { margin-top: 20px; }
+        .result-item { padding: 15px; border-bottom: 1px solid #eee; animation: fadeIn 0.5s; }
+        .result-item:last-child { border-bottom: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🎬 AI 의미 기반 검색</h2>
+    <p style="font-size: 0.9rem; color: #666; text-align: center;">줄거리의 의미를 분석하여 가장 유사한 애니를 찾습니다.</p>
+
+    <div class="search-box">
+        <input type="text" id="query" placeholder="예: 평범한 학생이 마법 세계로 가는 이야기" onkeyup="if(window.event.keyCode==13){doSearch()}">
+        <button onclick="doSearch()">검색</button>
+    </div>
+
+    <div id="resultList">
+    </div>
+</div>
+
+<script>
+    async function doSearch() {
+        const queryInput = document.getElementById('query');
+        const resultDiv = document.getElementById('resultList');
+        const queryValue = queryInput.value;
+
+        if (!queryValue.trim()) {
+            alert("검색어를 입력해주세요!");
+            return;
+        }
+
+        // 로딩 표시
+        resultDiv.innerHTML = "<p style='text-align:center;'>AI가 의미를 분석 중입니다...</p>";
+
+        try {
+            // 서버의 @PostMapping("/api/search") 호출
+            const response = await fetch('/api/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: queryValue }) // JSON 객체로 전송
+            });
+
+            if (!response.ok) throw new Error("서버 응답 오류");
+
+            const data = await response.json(); // List<String> 받기
+
+            // 결과 화면 업데이트
+            if (data.length === 0) {
+                resultDiv.innerHTML = "<p style='text-align:center;'>검색 결과가 없습니다.</p>";
+            } else {
+                resultDiv.innerHTML = data.map((title, index) =>
+                    `<div class="result-item"><strong>${index + 1}.</strong> ${title}</div>`
+                ).join('');
+            }
+
+        } catch (error) {
+            console.error("Search Error:", error);
+            resultDiv.innerHTML = "<p style='color:red;'>검색 중 오류가 발생했습니다.</p>";
+        }
+    }
+</script>
+
+</body>
+</html>
