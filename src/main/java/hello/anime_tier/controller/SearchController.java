@@ -1,8 +1,7 @@
 package hello.anime_tier.controller;
 
 
-import hello.anime_tier.service.SearchService;
-import lombok.Data;
+import hello.anime_tier.service.StorySearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +11,7 @@ import java.util.List;
 @RequestMapping("/api/search")
 @RequiredArgsConstructor
 public class SearchController {
-    private final SearchService searchService;
+    private final StorySearchService searchService;
 
     @PostMapping
     public List<String> search(@RequestBody SearchRequest request) { // @RequestParam에서 변경

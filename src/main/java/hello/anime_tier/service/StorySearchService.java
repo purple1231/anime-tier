@@ -13,7 +13,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SearchService {
+public class StorySearchService {
     private final SynopsisChunkRepository synopsisChunkRepository;
     private final TransformersEmbeddingModel embeddingModel;
 
