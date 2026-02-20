@@ -1,31 +1,70 @@
 package hello.anime_tier.service;
 
+import hello.anime_tier.domain.search.service.TextSplitter;
 import hello.anime_tier.entity.TagEntity;
 import hello.anime_tier.repository.TagRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.transformers.TransformersEmbeddingModel;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class TagSearchService {
 
     private final TagRepository tagRepository;
     private final TransformersEmbeddingModel embeddingModel;
+    private final AwsBedrockService awsBedrockService;
+    private final TextSplitter textSplitter;
 
-    public List<String> extractTopTags(String userInput) {
-        // 1. 문장 분리
-        List<String> sentences = splitIntoSentences(userInput);
+    public TagSearchService(TagRepository tagRepository,
+                            TransformersEmbeddingModel embeddingModel,
+                            AwsBedrockService awsBedrockService,
+                            @Qualifier("sentenceSplitService") TextSplitter textSplitter) {
+        this.tagRepository = tagRepository;
+        this.embeddingModel = embeddingModel;
+        this.awsBedrockService = awsBedrockService;
+        this.textSplitter = textSplitter;
+    }
+
+    public List<String> extractTopFinalTags(String userInput){
+        List<String> finalTags = extractTopTags(userInput);
+
+        String tagsString = String.join(", ", finalTags);
+
+        String aiRequest = String.format(
+                "여기 있는 태그들 [%s] 중에서, 사용자의 질문 '%s'와 가장 잘 어울리는 태그 3개만 골라줘. " +
+                        "답변 양식은 반드시 {태그1}, {태그2}, {태그3} 처럼 중괄호를 사용해줘.",
+                tagsString, userInput
+        );
+
+        String response = awsBedrockService.askToAwsAi(aiRequest);
+        List<String> result = divideResponse(response);
+        return result;
+    }
+
+    private List<String> divideResponse(String response){
+        List<String> result = new ArrayList<>();
+        Pattern pattern = Pattern.compile("\\{(.*?)\\}");
+        Matcher matcher = pattern.matcher(response);
+
+        while (matcher.find()) {
+            result.add(matcher.group(1)); // { } 안의 알맹이만 추가
+        }
+
+        return result;
+    }
+
+    private List<String> extractTopTags(String userInput) {
+        // 1. 문장 분리 (인터페이스 사용)
+        List<String> sentences = textSplitter.split(userInput);
 
         // 2. 태그 리스트 로드
         List<TagEntity> allTags = tagRepository.findAll();
@@ -49,7 +88,7 @@ public class TagSearchService {
                                     calculateCosineSimilarity(sentenceVector, tv.vector())
                             ))
                             .sorted(Comparator.comparingDouble(TagScore::score).reversed())
-                            .limit(2); // ✨ 문단별로 상위 2개만 먼저 선정
+                            .limit(20); // ✨ 문단별로 상위 2개만 먼저 선정
                 })
                 // 4. 모든 문단에서 모인 태그들을 하나로 합치고 중복 제거
                 .map(TagScore::tagName)
@@ -57,20 +96,8 @@ public class TagSearchService {
                 .collect(Collectors.toList());
     }
 
-    private List<String> splitIntoSentences(String text) {
-        List<String> sentences = new ArrayList<>();
-        BreakIterator boundary = BreakIterator.getSentenceInstance(Locale.ENGLISH);
-        boundary.setText(text);
-        int start = boundary.first();
-        for (int end = boundary.next(); end != BreakIterator.DONE; start = end, end = boundary.next()) {
-            String sentence = text.substring(start, end).trim();
-            if (!sentence.isEmpty()) sentences.add(sentence);
-        }
-        return sentences;
-    }
-
     private float[] convertToFloatArray(byte[] bytes) {
-        FloatBuffer fb = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer();
+        FloatBuffer fb = ByteBuffer.wrap(bytes).asFloatBuffer();
         float[] array = new float[fb.remaining()];
         fb.get(array);
         return array;
