@@ -1,7 +1,7 @@
-package hello.anime_tier.controller;
+package hello.anime_tier.domain.save.controller;
 
 
-import hello.anime_tier.service.AnimeSyncService;
+import hello.anime_tier.domain.save.service.AnimeSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

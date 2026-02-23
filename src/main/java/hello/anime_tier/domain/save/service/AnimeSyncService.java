@@ -1,15 +1,6 @@
-package hello.anime_tier.service;
+package hello.anime_tier.domain.save.service;
 
 import hello.anime_tier.dto.AniListDto;
-import hello.anime_tier.entity.AnimeEntity;
-import hello.anime_tier.entity.AnimeTagMappingEntity;
-import hello.anime_tier.entity.SynopsisChunkEntity;
-import hello.anime_tier.entity.TagEntity;
-import hello.anime_tier.repository.AnimeRepository;
-import hello.anime_tier.repository.AnimeTagMappingRepository;
-import hello.anime_tier.repository.SynopsisChunkRepository;
-import hello.anime_tier.repository.TagRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -87,6 +78,9 @@ public class AnimeSyncService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("query", ANILIST_QUERY);
         requestBody.put("variables", variables);
+
+        String rawResponse = restTemplate.postForObject(URL, requestBody, String.class);
+        log.info("🌐 AniList 서버 응답 원문: {}", rawResponse);
 
         return restTemplate.postForObject(URL, requestBody, AniListDto.AniListResponse.class);
 

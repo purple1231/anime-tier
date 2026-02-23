@@ -1,16 +1,12 @@
-package hello.anime_tier.service;
+package hello.anime_tier.domain.save.service;
 
 
-import hello.anime_tier.entity.AnimeEntity;
-import hello.anime_tier.entity.SynopsisChunkEntity;
 import hello.anime_tier.repository.AnimeRepository;
 import hello.anime_tier.repository.SynopsisChunkRepository;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

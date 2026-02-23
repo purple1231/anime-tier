@@ -1,4 +1,4 @@
-package hello.anime_tier.service;
+package hello.anime_tier.domain.save.service;
 
 import hello.anime_tier.entity.SynopsisChunkEntity;
 import hello.anime_tier.entity.TagEntity;
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.List;
-
+import com.pgvector.PGvector;
 
 @Slf4j
 @Service
@@ -52,11 +52,12 @@ public class EmbeddingService {
                 // 이 과정에서 사용자의 CPU 점유율이 일시적으로 올라갑니다.
                 float[] vector = embeddingModel.embed(text);
 
-                // 4. float[] 배열을 MySQL의 BLOB 타입에 저장하기 위해 byte[]로 변환합니다.
-                byte[] byteVector = convertToBytes(vector);
+//                // 4. float[] 배열을 MySQL의 BLOB 타입에 저장하기 위해 byte[]로 변환합니다.
+//                byte[] byteVector = convertToBytes(vector);
 
                 // 5. 엔티티에 세팅 (Dirty Checking에 의해 메서드 종료 시 자동 DB 저장)
-                chunk.setEmbedding(byteVector);
+                // chunk.setEmbedding(vector);
+                chunk.setEmbedding(vector);
 
                 log.info("애니메이션 ID {}의 문단 임베딩 완료", chunk.getAnime().getAnimeId());
 
@@ -85,9 +86,9 @@ public class EmbeddingService {
             try{
                 float[] vector = embeddingModel.embed(tagName);
 
-                byte[] byteVector = convertToBytes(vector);
+//                byte[] byteVector = convertToBytes(vector);
 
-                tag.setTagEmbedding(byteVector);
+                tag.setTagEmbedding(vector);
                 log.info("애니메이션 태그 {} 임베딩 완료", tag.getTagName());
             } catch (Exception e) {
                 log.error("임베딩 중 생성 오류 발생: {}", e.getMessage());

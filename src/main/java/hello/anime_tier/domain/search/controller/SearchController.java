@@ -1,7 +1,7 @@
-package hello.anime_tier.controller;
+package hello.anime_tier.domain.search.controller;
 
 
-import hello.anime_tier.service.StorySearchService;
+import hello.anime_tier.domain.search.service.StorySearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

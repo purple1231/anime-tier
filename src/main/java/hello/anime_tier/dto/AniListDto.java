@@ -12,6 +12,7 @@ public class AniListDto {
 
         @Data
         public static class DataContainer {
+            @com.fasterxml.jackson.annotation.JsonProperty("Page")
             private PageContainer Page;
         }
 

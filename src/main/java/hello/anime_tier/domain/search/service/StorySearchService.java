@@ -1,4 +1,4 @@
-package hello.anime_tier.service;
+package hello.anime_tier.domain.search.service;
 
 
 import hello.anime_tier.entity.SynopsisChunkEntity;
@@ -27,8 +27,8 @@ public class StorySearchService {
         //3. 유사도 계산 및 정렬
         return allChunks.stream()
                 .filter(chunk -> chunk.getEmbedding() != null)
-                .map( chunk -> {
-                    float[] chunkVector = convertToFloatArray(chunk.getEmbedding());
+                .map(chunk -> {
+                    float[] chunkVector = chunk.getEmbedding(); // 바로 가져오기
                     double score = calculateCosineSimilarity(queryVector, chunkVector);
                     return new SearchResult(chunk.getAnime().getTitleEn(), score);
                 })

@@ -1,5 +1,6 @@
-package hello.anime_tier.service;
+package hello.anime_tier.domain.save.service;
 
+import com.pgvector.PGvector;
 import hello.anime_tier.dto.AniListDto;
 import hello.anime_tier.entity.AnimeEntity;
 import hello.anime_tier.entity.AnimeTagMappingEntity;
@@ -12,8 +13,8 @@ import hello.anime_tier.repository.TagRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.transformers.TransformersEmbeddingModel;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 
 @Slf4j
@@ -25,6 +26,8 @@ public class AnimeSaveService {
     private final TagRepository tagRepository;
     private final AnimeTagMappingRepository mappingRepository;
     private final SynopsisChunkRepository chunkRepository;
+
+    private final TransformersEmbeddingModel embeddingModel;
 
     @Transactional // 중간에 하나라도 실패하면 rollback 기능
     public void processMedia(AniListDto.AniListResponse.Media media){
@@ -49,6 +52,8 @@ public class AnimeSaveService {
                         TagEntity newTag = new TagEntity();
                         newTag.setTagId(tagDto.getId());
                         newTag.setTagName(tagDto.getName());
+                        float[] tagVector = embeddingModel.embed(tagDto.getName());
+                        newTag.setTagEmbedding(tagVector);
                         return tagRepository.save(newTag);
                     });
 
@@ -64,6 +69,9 @@ public class AnimeSaveService {
         SynopsisChunkEntity chunk = new SynopsisChunkEntity();
         chunk.setAnime(anime);
         chunk.setChunkText(media.getDescription()); // 현재는 통째로 저장, 추후 분할 로직 추가 가능
+        float[] embedding = embeddingModel.embed(media.getDescription());
+        chunk.setEmbedding(embedding);
+
         chunkRepository.save(chunk);
 
 

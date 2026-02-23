@@ -1,4 +1,4 @@
-package hello.anime_tier.service;
+package hello.anime_tier.domain.search.service;
 
 
 import lombok.RequiredArgsConstructor;
