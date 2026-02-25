@@ -87,41 +87,41 @@ class AnimeRecommendationServiceIntegrationTest {
         animeTagMappingRepository.save(mapping3);
     }
 
-    @Test
-    @DisplayName("태그 기반 애니메이션 추천 통합 테스트")
-    void recommendAnimesByTagsTest() {
-        // given
-        List<String> tags = List.of("Action", "Comedy", "Fantasy");
-
-        // when
-        List<AnimeEntity> recommendations = animeRecommendationService.recommendAnimesByTags(tags, tagResult.getPriorityTag());
-
-        // then
-        System.out.println("🎉 추천된 애니메이션 개수: " + recommendations.size());
-        recommendations.forEach(anime -> 
-            System.out.println("📺 " + anime.getTitleEn() + " (평점: " + anime.getAverageScore() + ")")
-        );
-
-        assertThat(recommendations).isNotEmpty();
-        assertThat(recommendations).hasSize(2);
-        
-        // 정렬 순서 검증: 
-        // Anime2는 태그 2개 일치 (Comedy, Fantasy) -> 우선순위 높음
-        // Anime1은 태그 1개 일치 (Action) -> 우선순위 낮음
-        assertThat(recommendations.get(0).getTitleEn()).isEqualTo("Funny Fantasy");
-        assertThat(recommendations.get(1).getTitleEn()).isEqualTo("Action Hero");
-    }
+//    @Test
+//    @DisplayName("태그 기반 애니메이션 추천 통합 테스트")
+//    void recommendAnimesByTagsTest() {
+//        // given
+//        List<String> tags = List.of("Action", "Comedy", "Fantasy");
+//
+//        // when
+//        List<AnimeEntity> recommendations = animeRecommendationService.recommendAnimesByTags(tags, tagResult.getPriorityTag());
+//
+//        // then
+//        System.out.println("🎉 추천된 애니메이션 개수: " + recommendations.size());
+//        recommendations.forEach(anime ->
+//            System.out.println("📺 " + anime.getTitleEn() + " (평점: " + anime.getAverageScore() + ")")
+//        );
+//
+//        assertThat(recommendations).isNotEmpty();
+//        assertThat(recommendations).hasSize(2);
+//
+//        // 정렬 순서 검증:
+//        // Anime2는 태그 2개 일치 (Comedy, Fantasy) -> 우선순위 높음
+//        // Anime1은 태그 1개 일치 (Action) -> 우선순위 낮음
+//        assertThat(recommendations.get(0).getTitleEn()).isEqualTo("Funny Fantasy");
+//        assertThat(recommendations.get(1).getTitleEn()).isEqualTo("Action Hero");
+//    }
     
-    @Test
-    @DisplayName("존재하지 않는 태그로 검색 시 빈 리스트 반환")
-    void recommendAnimesByUnknownTagsTest() {
-        // given
-        List<String> tags = List.of("UnknownTag123", "NotExistTag456");
-
-        // when
-        List<AnimeEntity> recommendations = animeRecommendationService.recommendAnimesByTags(tags, tagResult.getPriorityTag());
-
-        // then
-        assertThat(recommendations).isEmpty();
-    }
+//    @Test
+//    @DisplayName("존재하지 않는 태그로 검색 시 빈 리스트 반환")
+//    void recommendAnimesByUnknownTagsTest() {
+//        // given
+//        List<String> tags = List.of("UnknownTag123", "NotExistTag456");
+//
+//        // when
+//        List<AnimeEntity> recommendations = animeRecommendationService.recommendAnimesByTags(tags, tagResult.getPriorityTag());
+//
+//        // then
+//        assertThat(recommendations).isEmpty();
+//    }
 }

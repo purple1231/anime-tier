@@ -20,49 +20,49 @@ public class StorySearchService {
     public List<String> searchAnime(String query){
         //1. 사용자 질문 벡터변환
         float[] queryVector = embeddingModel.embed(query);
+        String vec = toPgVectorLiteral(queryVector);
 
-        //2. 데이터베이스에서 모든 청크 데이터 로드
-        List<SynopsisChunkEntity> allChunks = synopsisChunkRepository.findAll();
-
-        //3. 유사도 계산 및 정렬
-        return allChunks.stream()
-                .filter(chunk -> chunk.getEmbedding() != null)
-                .map(chunk -> {
-                    float[] chunkVector = chunk.getEmbedding(); // 바로 가져오기
-                    double score = calculateCosineSimilarity(queryVector, chunkVector);
-                    return new SearchResult(chunk.getAnime().getTitleEn(), score);
-                })
-                .sorted((a,b) -> Double.compare(b.score, a.score))
-                .limit(5)
-                .map(res -> res.title)
-                .toList();
-
+        //2. DB에서 벡터 유사도 검색 수행 (Top 5)
+        return synopsisChunkRepository.findTopKAnimeTitlesByVector(vec, 20);
     }
 
-    private float[] convertToFloatArray(byte[] bytes) {
-        FloatBuffer fb = ByteBuffer.wrap(bytes).asFloatBuffer();
-
-        float[] array = new float[fb.remaining()];
-
-        fb.get(array);
-        return array;
-    }
-
-    //코사인 유사도 공식
-    private double calculateCosineSimilarity(float[] v1, float[] v2) {
-        double dotProduct = 0;
-        double normA = 0;
-        double normB = 0;
-        for (int i = 0; i < v1.length; i++) {
-            dotProduct += v1[i] * v2[i];
-            normA += Math.pow(v1[i], 2);
-            normB += Math.pow(v2[i], 2);
+    private String toPgVectorLiteral(float[] v) {
+        // pgvector 입력 형식: [1,2,3] 또는 [1.0,2.0,...]
+        StringBuilder sb = new StringBuilder(v.length * 8);
+        sb.append('[');
+        for (int i = 0; i < v.length; i++) {
+            if (i > 0) sb.append(',');
+            // 너무 긴 소수는 불필요. 성능/문자열 길이 줄이기 위해 적당히 제한
+            sb.append(String.format(java.util.Locale.US, "%.6f", v[i]));
         }
-        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+        sb.append(']');
+        return sb.toString();
+    }
+
+
+    public java.util.Map<Integer, Integer> getStoryTop20RankMap(String query) {
+        float[] queryVector = embeddingModel.embed(query);
+        String vec = toPgVectorLiteral(queryVector);
+
+        // 중복 때문에 넉넉히 뽑기
+        List<Integer> raw = synopsisChunkRepository.findTopKAnimeIdsByVector(vec, 100);
+
+        java.util.Map<Integer, Integer> rankMap = new java.util.HashMap<>();
+        int rank = 1;
+        for (Integer animeId : raw) {
+            if (!rankMap.containsKey(animeId)) {
+                rankMap.put(animeId, rank);
+                rank++;
+                if (rank > 20) break;
+            }
+        }
+        return rankMap;
     }
 
 
 
-    private record SearchResult(String title, double score) {}
+
+
+
 
 }

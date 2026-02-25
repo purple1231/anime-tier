@@ -35,7 +35,7 @@ public class RecommendationController {
         log.info("선택된 태그: {}", tagResult.getFinalTags());
 
         // 2. 추출된 최종 태그를 기반으로 애니메이션 추천 (태그 일치도 & 평점 순)
-        List<AnimeEntity> recommendedAnimes = animeRecommendationService.recommendAnimesByTags(tagResult.getFinalTags(), tagResult.getPriorityTag());
+        List<AnimeEntity> recommendedAnimes = animeRecommendationService.recommendAnimesByTags(tagResult.getFinalTags(), tagResult.getPriorityTag(), prompt);
 
         log.info("추천된 애니메이션 개수: {}", recommendedAnimes.size());
 

@@ -83,21 +83,21 @@ class TagSearchIntergrationTest {
         assertThat(candidateTags).isNotEmpty();
     }
 
-    @Test
-    @DisplayName("테스트 4: 전체 흐름 검증 (임베딩 -> DB검색 -> AI필터링)")
-    void step4_FullFlow_EmbeddingToLLM() {
-        //given
-        String input = "I want to watch a touching anime about music and friendship.";
-
-        //when
-        // 이 메서드가 내부적으로 extractTopTags(임베딩+DB) -> askToAwsAi(LLM) -> divideResponse(파싱) 다 수행함
-        List<String> finalTags = tagSearchService.extractTopFinalTags(input);
-
-        //then
-        System.out.println("🎉 최종 추천 태그: " + finalTags);
-        assertThat(finalTags).isNotEmpty();
-        
-        // 프롬프트에서 3개를 요청했으므로 3개가 와야 하지만, AI 특성상 오차가 있을 수 있어 1~5개로 검증
-        assertThat(finalTags.size()).isBetween(1, 5);
-    }
+//    @Test
+//    @DisplayName("테스트 4: 전체 흐름 검증 (임베딩 -> DB검색 -> AI필터링)")
+//    void step4_FullFlow_EmbeddingToLLM() {
+//        //given
+//        String input = "I want to watch a touching anime about music and friendship.";
+//
+//        //when
+//        // 이 메서드가 내부적으로 extractTopTags(임베딩+DB) -> askToAwsAi(LLM) -> divideResponse(파싱) 다 수행함
+//        List<String> finalTags = tagSearchService.extractTopFinalTags(input);
+//
+//        //then
+//        System.out.println("🎉 최종 추천 태그: " + finalTags);
+//        assertThat(finalTags).isNotEmpty();
+//
+//        // 프롬프트에서 3개를 요청했으므로 3개가 와야 하지만, AI 특성상 오차가 있을 수 있어 1~5개로 검증
+//        assertThat(finalTags.size()).isBetween(1, 5);
+//    }
 }

@@ -48,8 +48,8 @@ dependencies {
     implementation "org.hibernate.orm:hibernate-vector:${hibernateVersion}"
 
 
-    implementation platform("software.amazon.awssdk:bom:2.25.56")
-    implementation 'software.amazon.awssdk:bedrockruntime:2.29.23'
+    implementation platform("software.amazon.awssdk:bom:2.41.34")
+    implementation "software.amazon.awssdk:bedrockruntime"
 
 
 
